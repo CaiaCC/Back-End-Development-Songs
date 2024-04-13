@@ -62,3 +62,12 @@ def count():
 
     return {"message": "Internal server error"}, 500
 
+@app.route("/song", methods=["GET"])
+def songs():
+    try:
+        list_of_songs = db.songs.find({})
+        return jsonify(songs=json_util.dumps(list_of_songs)), 200
+    except Exception:
+         return {"message": "Error occur when fetching songs"}, 500
+
+    return {"message": "Internal server error"}, 500
