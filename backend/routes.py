@@ -55,4 +55,10 @@ def parse_json(data):
 def health():
     return jsonify(status="OK"), 200
 
+@app.route("/count")
+def count():
+    if songs_list:
+        return jsonify(count=len(songs_list)), 200
+
+    return {"message": "Internal server error"}, 500
 
