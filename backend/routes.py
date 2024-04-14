@@ -81,7 +81,7 @@ def get_song_by_id(id):
     except OperationFailure:
          return {"message": OperationFailure.message}, 500
 
-    return {"message": "Song with id not found"}, 404
+    return {"message": f"Song with id {id} not found"}, 404
 
 
 @app.route("/song", methods=["POST"])
