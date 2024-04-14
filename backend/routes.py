@@ -51,3 +51,65 @@ def parse_json(data):
 ######################################################################
 # INSERT CODE HERE
 ######################################################################
+@app.route("/health")
+def health():
+    return jsonify(status="OK"), 200
+
+
+@app.route("/count")
+def count():
+    if songs_list:
+        return jsonify(count=len(songs_list)), 200
+
+    return {"message": "Internal server error"}, 500
+
+
+@app.route("/song", methods=["GET"])
+def songs():
+    try:
+        list_of_songs = db.songs.find({})
+        return json_util.dumps(list_of_songs), 200
+    except OperationFailure:
+         return {"message": OperationFailure.message}, 500
+
+    return {"message": "Internal server error"}, 500
+
+
+@app.route("/song/<int:id>", methods=["GET"])
+def get_song_by_id(id):
+    try: 
+        song_found = db.songs.find_one({"id": id})
+        return json_util.dumps(song_found), 200
+    except OperationFailure:
+         return {"message": OperationFailure.message}, 500
+
+    return {"message": "Song with id not found"}, 404
+
+
+@app.route("/song", methods=["POST"])
+def create_song():
+    new_song = request.json
+    # handle dupicated id
+    song_existed = db.songs.find_one({"id": new_song["id"]})
+    if song_existed:
+        return {"Message": f"Song with id {new_song['id']} already present"}, 302
+    # handle insert
+    try:
+        result = db.songs.insert_one(new_song)
+        return {"inserted id": json_util.dumps(result.inserted_id)}, 201
+    except OperationFailure:
+         return {"message": OperationFailure.message}, 500
+
+    return {"message": "Song with id not found"}, 404
+
+
+@app.route("/song/<int:id>", methods=["DELETE"])
+def delete_song(id):
+    try:
+        result = db.songs.delete_one({"id": id})
+        if result.deleted_count == 0:
+            return {"message": "song not found"}, 404
+    except OperationFailure:
+         return {"message": OperationFailure.message}, 500
+
+    return "", 204
