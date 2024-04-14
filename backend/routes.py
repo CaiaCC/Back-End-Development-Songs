@@ -101,3 +101,21 @@ def create_song():
          return {"message": OperationFailure.message}, 500
 
     return {"message": "Song with id not found"}, 404
+
+
+@app.route("/song/<int:id>", methods=["PUT"])
+def update_song(id):
+    update_data = request.json
+    song_to_update = db.songs.find_one({"id": id})
+    if not song_to_update:
+        return {"Message": "song not found"}, 404
+
+    try:
+        result = db.songs.update_one({"id": id}, {"$set": update_data})
+        if not result.modified_count == 0:
+            return {"message":"song found, but nothing updated"}, 200
+    except OperationFailure:
+         return {"message": OperationFailure.message}, 500
+
+    updated_song = db.songs.find_one({"id": id})
+    return json_util.dumps(updated_song), 201
